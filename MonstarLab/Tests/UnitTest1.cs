@@ -2,7 +2,7 @@ using System.Net;
 using MonstarLab.Pages;
 using NUnit.Framework;
 
-namespace MonstarLab;
+namespace MonstarLab.Tests;
 
 public class Tests
 { 
@@ -241,6 +241,7 @@ public class Tests
         
          
      }
+    
      [OneTimeTearDown]
      public void TearDown()
      {
