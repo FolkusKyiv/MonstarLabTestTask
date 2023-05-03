@@ -1,15 +1,41 @@
 using System.Net;
 using MonstarLab.Pages;
 using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace MonstarLab.Tests;
 
 public class Tests
 { 
     private const int ModalItemCount = 15;
-    
+    public const string LandingUrl = "https://www.mall.cz/";
+    private const int TimeBetweenTests = 30000; // in milisec
 
- [Test]
+    public static ChromeDriver Driver()
+    {
+        var chromeOptions = new ChromeOptions();
+        
+        // --headless allows to run faster and more convenient. Window size specs needed so the website work correctly 
+        // in headless mode
+        chromeOptions.AddArguments("--headless", "-window-size=1920,1080");
+        var driver = new ChromeDriver(chromeOptions);
+        
+        //Going to URL
+        driver.Navigate().GoToUrl(LandingUrl);
+        
+        //Scrolling down the page to load all carousels
+        IJavaScriptExecutor js = driver;
+        js.ExecuteScript("window.scrollTo(0, document.body.scrollHeight);");
+        return driver; 
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        var elementMaster = LandingPage.Carousels();
+    }
+    [Test]
      public void PageConnectionCheck()
      {
 
@@ -49,7 +75,12 @@ public class Tests
            //Assertion
            Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
       }
-      
+      [OneTimeTearDown]
+      public void TearDownOneTime()
+      {
+          // Pause for 5 seconds in-between tests 
+          Thread.Sleep(TimeBetweenTests);
+      }
      }
 
      [TestFixture]
@@ -76,7 +107,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-         
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
      
      [TestFixture]
@@ -103,7 +139,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-         
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
      
      [TestFixture]
@@ -130,7 +171,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-       
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
 
      [TestFixture]
@@ -157,7 +203,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-         
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
      
      [TestFixture]
@@ -184,7 +235,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-         
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
      
      [TestFixture]
@@ -211,7 +267,12 @@ public class Tests
              //Assertion
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
-        
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
      }
      
      [TestFixture]
@@ -239,14 +300,21 @@ public class Tests
              Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
          }
         
+         [OneTimeTearDown]
+         public void TearDownOneTime()
+         {
+             // Pause for 5 seconds in-between tests 
+             Thread.Sleep(TimeBetweenTests);
+         }
          
      }
-    
-     [OneTimeTearDown]
+
+     [TearDown]
      public void TearDown()
      {
-         // Pause for 5 seconds in-between tests (error 1015 too many requests, provided by Cloudflare on mall.cz
-         Thread.Sleep(30000);
+     //Closing driver instance
+         Driver().Quit();
+         Driver().Dispose();
      }
 }
 
