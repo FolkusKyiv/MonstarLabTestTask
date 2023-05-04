@@ -10,49 +10,48 @@ public class Tests
 { 
     private const int ModalItemCount = 15;
     public const string LandingUrl = "https://www.mall.cz/";
-    private const int TimeBetweenTests = 30000; // in milisec
-
-    public static ChromeDriver Driver()
+    public static class Driver
     {
-        var chromeOptions = new ChromeOptions();
-        
-        // --headless allows to run faster and more convenient. Window size specs needed so the website work correctly 
-        // in headless mode
-        chromeOptions.AddArguments("--headless", "-window-size=1920,1080");
-        var driver = new ChromeDriver(chromeOptions);
-        
-        //Going to URL
-        driver.Navigate().GoToUrl(LandingUrl);
-        
-        //Scrolling down the page to load all carousels
-        IJavaScriptExecutor js = driver;
-        js.ExecuteScript("window.scrollTo(0, document.body.scrollHeight);");
-        return driver; 
+        //Setting an instance of the ChromeDriver
+        public static ChromeDriver driver { get; internal set; }
     }
-
     [SetUp]
-    public void SetUp()
+    public static void SetUp()
     {
-        var elementMaster = LandingPage.Carousels();
+        //Check that driver is not set up alreay
+        if (Driver.driver == null)
+        {
+            //Adding some options
+            var options = new ChromeOptions();
+            options.AddArguments("--headless", "-window-size=1920,1080");
+            Driver.driver = new ChromeDriver(options);
+            
+            //Going to the landing page
+            Driver.driver.Navigate().GoToUrl(LandingUrl);
+            
+            //Ensuring that al carousels are loaded
+            IJavaScriptExecutor js = Driver.driver;
+            js.ExecuteScript("window.scrollBy(0, 10000);");
+            Thread.Sleep(1000);
+        }
+        //Initialising a method to save all carousels into carousels list
+        LandingPage.carousels = LandingPage.Carousels();
+
     }
-    [Test]
+    
+
+     [Test]
      public void PageConnectionCheck()
      {
-
-         // Arrange
+        // Arrange
          var landingPage = new LandingPage();
          // Act
          var statusCode = landingPage.GetStatusCode();
          // Assert
          Assert.That(statusCode, Is.EqualTo(HttpStatusCode.OK));
-     
-         
-         
      }
 
-     [TestFixture]
-     public class CarouselAkce
-     {
+
 
       [Test]
       public void CarouselAkceItemCountCheck()
@@ -75,246 +74,164 @@ public class Tests
            //Assertion
            Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
       }
-      [OneTimeTearDown]
-      public void TearDownOneTime()
+
+      
+      [Test]
+      public void CarouselFurnitureItemCountCheck()
       {
-          // Pause for 5 seconds in-between tests 
-          Thread.Sleep(TimeBetweenTests);
+          //Calling the method
+          var itemCount = LandingPage.CarouselFurnitureItemCount();
+          
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+       
       }
-     }
 
-     [TestFixture]
-     public class CarouselHouseFurniture
-     {
-         [Test]
-         public void CarouselFurnitureItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselFurnitureItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselFurnitureIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselFurnitureIsUnique();
+      [Test]
+      public void CarouselFurnitureIsUniqueCheck()
+      {
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselFurnitureIsUnique();
            
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-     
-     [TestFixture]
-     public class CarouselKidsToys
-     {
-         [Test]
-         public void CarouselKidsToysItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselKidsToysItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselKidsToysIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselKidsToysIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-     
-     [TestFixture]
-     public class CarouselTV
-     {
-         [Test]
-         public void CarouselTVItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselTVItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselTVIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselTVIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-
-     [TestFixture]
-     public class CarouselFreeDelivery
-     {
-         [Test]
-         public void CarouselFreeDeliveryItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselFreeDeliveryItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselFreeDeliveryIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselFreeDeliveryIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-     
-     [TestFixture]
-     public class CarouselTools
-     {
-         [Test]
-         public void CarouselToolsItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselToolsItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselToolsIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselToolsIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-     
-     [TestFixture]
-     public class CarouselCleaning
-     {
-         [Test]
-         public void CarouselCleaningItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselCleaningItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselToolsIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselCleaningIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
-     }
-     
-     [TestFixture]
-     public class CarouselFavCategories
-     {
-         [Test]
-         public void CarouselFavCategoriesItemCountCheck()
-         {
-             //Calling the method
-             var itemCount = LandingPage.CarouselFavCategoriesItemCount();
-          
-             //Assertion
-             Assert.That(itemCount, Is.EqualTo(ModalItemCount),
-                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
-       
-         }
-
-         [Test]
-         public void CarouselToolsIsUniqueCheck()
-         {
-             //Calling the method
-             var uniqueCheck = LandingPage.CarouselFavCategoriesIsUnique();
-           
-             //Assertion
-             Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
-         }
-        
-         [OneTimeTearDown]
-         public void TearDownOneTime()
-         {
-             // Pause for 5 seconds in-between tests 
-             Thread.Sleep(TimeBetweenTests);
-         }
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+      
+      [Test]
+      public void CarouselKidsToysItemCountCheck()
+      {
+          //Calling the method
+          var itemCount = LandingPage.CarouselKidsToysItemCount();
          
-     }
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+      }
 
-     [TearDown]
+      [Test]
+      public void CarouselKidsToysIsUniqueCheck()
+      { 
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselKidsToysIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+    }
+
+      [Test]
+      public void CarouselTVItemCountCheck()
+      {
+          //Calling the method
+          var itemCount = LandingPage.CarouselTVItemCount();
+         
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+       
+      }
+
+      [Test]
+      public void CarouselTVIsUniqueCheck()
+      { 
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselTVIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+
+      [Test]
+      public void CarouselFreeDeliveryItemCountCheck()
+      { 
+          //Calling the method
+          var itemCount = LandingPage.CarouselFreeDeliveryItemCount();
+          
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+      }
+
+      [Test]
+      public void CarouselFreeDeliveryIsUniqueCheck() 
+      {
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselFreeDeliveryIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+
+      [Test]
+      public void CarouselToolsItemCountCheck()
+      {
+          //Calling the method
+          var itemCount = LandingPage.CarouselToolsItemCount();
+          
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+       
+      }
+
+      [Test] 
+      public void CarouselToolsIsUniqueCheck()
+      { 
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselToolsIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+
+      [Test]
+      public void CarouselCleaningItemCountCheck()
+      { 
+          //Calling the method
+          var itemCount = LandingPage.CarouselCleaningItemCount();
+             
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+      }
+
+      [Test]
+      public void CarouselCleaningIsUniqueCheck()
+      { 
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselCleaningIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+
+      [Test]
+      public void CarouselFavCategoriesItemCountCheck()
+      {
+          //Calling the method
+          var itemCount = LandingPage.CarouselFavCategoriesItemCount();
+          
+          //Assertion
+          Assert.That(itemCount, Is.EqualTo(ModalItemCount),
+                 $"There are {itemCount} items in the carousel. Whereas expected: {ModalItemCount}");
+       
+      }
+
+      [Test]
+      public void CarouselFavCategoryIsUniqueCheck()
+      {
+          //Calling the method
+          var uniqueCheck = LandingPage.CarouselFavCategoriesIsUnique();
+           
+          //Assertion
+          Assert.That(uniqueCheck, Is.True, "There were repetitions in the list"); //check console for the list
+      }
+
+    [OneTimeTearDown]
      public void TearDown()
      {
-     //Closing driver instance
-         Driver().Quit();
-         Driver().Dispose();
+        Driver.driver.Quit();
+        Driver.driver.Dispose();
      }
 }
 
